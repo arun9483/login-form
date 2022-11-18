@@ -28,8 +28,18 @@ input[type='password'] {
   box-sizing: border-box;
 }
 
-#remember + span {
+.remember {
   margin-left: 4px;
+}
+
+p.error {
+  color: red;
+  margin-bottom: 1.5em;
+}
+
+p::before {
+  display: inline;
+  content: '⚠ ';
 }
 
 button {
