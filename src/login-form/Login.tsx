@@ -10,12 +10,35 @@ interface LoginFormData {
   confirmPassword: string;
 }
 
+const submitForm = async (data: LoginFormData) => {
+  let p = new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (data.username === 'exists') {
+        reject({
+          username: {
+            type: 'server-side-validation',
+            message: 'Username already existed',
+          },
+        });
+      } else {
+        resolve({
+          status: 'OK',
+          statusCode: 200,
+        });
+      }
+    }, 2000);
+  });
+  return p;
+};
+
 const Login: React.FC<{}> = () => {
   const {
     register,
     handleSubmit,
     watch,
+    setError,
     clearErrors,
+    reset,
     formState: { errors },
   } = useForm<LoginFormData>({
     defaultValues: {
@@ -27,6 +50,27 @@ const Login: React.FC<{}> = () => {
   const password = watch('password');
   const confirmPassword = watch('confirmPassword');
 
+  const submitHandler = async (data: LoginFormData) => {
+    console.log('form data', data);
+
+    //handle server-error
+    try {
+      let result = await submitForm(data);
+      console.log(result);
+      reset();
+    } catch (e) {
+      // console.log(e);
+      setError('username', {
+        type: 'server-side-validation',
+        message: 'Username already existed',
+      });
+      setError('password', {
+        type: 'server-side-validation',
+        message: 'Previous 3 passwords can not be used',
+      });
+    }
+  };
+
   return (
     <div className="login-container">
       <h2>Login Form</h2>
@@ -34,12 +78,7 @@ const Login: React.FC<{}> = () => {
         <div className="logo-container">
           <img src={logo} className="App-logo" alt="logo" />
         </div>
-        <form
-          name="login-form"
-          onSubmit={handleSubmit((data) => {
-            console.log('form data', data);
-          })}
-        >
+        <form name="login-form" onSubmit={handleSubmit(submitHandler)}>
           <label>
             Username
             <input
